@@ -35,6 +35,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier)
 {
+	if(Modifier == nullptr) return;
+
 	UPlayerModifier* NewModifier = Modifier.GetDefaultObject();
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, 
