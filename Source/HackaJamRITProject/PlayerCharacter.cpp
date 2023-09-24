@@ -2,6 +2,7 @@
 
 
 #include "PlayerCharacter.h"
+#include "Projectile.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -31,6 +32,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, APlayerCharacter::FireWeapon);
+}
+
+void APlayerCharacter::FireWeapon()
+{
+	AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, FActorSpawnParameters());
 }
 
 void APlayerCharacter::ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier)

@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Defense = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UClass* ProjectileClass;
+
 	// TEMP
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UPlayerModifier> TestModifier;
@@ -40,6 +43,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void FireWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier);
