@@ -11,6 +11,12 @@ AProjectile::AProjectile()
 
 }
 
+void AProjectile::Setup(AController* InOwnerController, TSubclassOf<UDamageType> InDamageType)
+{
+	OwnerController = InOwnerController;
+	DamageType = InDamageType;
+}
+
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {

@@ -10,6 +10,9 @@ APlayerCharacter::APlayerCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Create Weapon component
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(GetMesh(), TEXT("weapon_r"));
 }
 
 // Called when the game starts or when spawned
@@ -32,12 +35,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &APlayerCharacter::FireWeapon);
+	//PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &APlayerCharacter::FireWeapon);
 }
 
 void APlayerCharacter::FireWeapon()
 {
-	AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, FActorSpawnParameters());
+	AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Weapon->GetSocketTransform(TEXT("Barrel")), FActorSpawnParameters());
+
+	proj->Setup(GetController(), UDamageType::StaticClass());
+
+	OnFireWeapon();
 }
 
 void APlayerCharacter::ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier)

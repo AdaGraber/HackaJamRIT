@@ -19,7 +19,7 @@ public:
 
 	TSubclassOf<UDamageType> DamageType;
 
-	void Setup(AController* OwnerController, TSubclassOf<UDamageType> DamageType);
+	void Setup(AController* InOwnerController, TSubclassOf<UDamageType> InDamageType);
 
 protected:
 	// Called when the game starts or when spawned

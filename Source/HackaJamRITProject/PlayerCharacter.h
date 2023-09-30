@@ -12,6 +12,11 @@ class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	// Components
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Weapon;
+
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
@@ -44,7 +49,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireWeapon();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
+	void OnFireWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier);
