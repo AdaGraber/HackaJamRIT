@@ -27,7 +27,7 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	FDamageEvent& DamageEvent = FDamageEvent(DamageType);
+	FDamageEvent DamageEvent(DamageType);
 
 	OtherActor->TakeDamage(100, DamageEvent, OwnerController, this);
 }
