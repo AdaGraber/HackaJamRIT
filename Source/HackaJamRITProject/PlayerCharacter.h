@@ -15,13 +15,20 @@ class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 	// Components
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* Weapon;
+	class USkeletalMeshComponent* WeaponComponent;
+
+	//Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
 
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
 	// Player Stats
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	float Health = 100.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MovementSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -49,11 +56,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapon")
 	void FireWeapon();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
 	void OnFireWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier);
+
+	UFUNCTION(Server, Reliable)
+	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
+	//float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
