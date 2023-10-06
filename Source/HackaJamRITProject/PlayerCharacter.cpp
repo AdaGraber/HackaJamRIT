@@ -8,6 +8,7 @@
 #include "Projectile.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
+#include "EscalationGameState.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -27,7 +28,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	ApplyPlayerModifier(TestModifier);
+	//ApplyPlayerModifier(TestModifier);
 }
 
 // Called every frame
@@ -61,13 +62,14 @@ void APlayerCharacter::FireWeapon_Implementation()
 		proj->Setup(
 			this, 
 			GetController(), 
+			Damage,
 			UDamageType::StaticClass(), 
 			GetActorForwardVector() * 2000);
 
 	OnFireWeapon();
 }
 
-void APlayerCharacter::ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier)
+void APlayerCharacter::ApplyPlayerModifier_Implementation(TSubclassOf<UPlayerModifier> Modifier)
 {
 	if(Modifier == nullptr) return;
 
@@ -87,6 +89,17 @@ void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AControl
 	//if(!HasAuthority()) return;
 
 	Health -= DamageAmount;
+
+	if(Health <= 0) Die();
+}
+
+void APlayerCharacter::Die()
+{
+	// Do something; animation?
+
+	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
+
+	GameState->AddInactivePlayer(this);
 }
 
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

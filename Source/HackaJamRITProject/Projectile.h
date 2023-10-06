@@ -18,7 +18,10 @@ class HACKAJAMRITPROJECT_API AProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AProjectile();
-	AProjectile(AActor* InOwner, AController* InOwnerController, TSubclassOf<UDamageType> InDamageType, FVector InVelocity);
+	AProjectile(
+		AActor* InOwner, AController* InOwnerController, 
+		float InDamage, TSubclassOf<UDamageType> InDamageType, 
+		FVector InVelocity);
 
 	UPROPERTY(Replicated)
 	bool bIsSetup = false;
@@ -29,10 +32,14 @@ public:
 	AController* OwnerController;
 
 	UPROPERTY(Replicated)
+	float Damage;
+	UPROPERTY(Replicated)
 	TSubclassOf<UDamageType> DamageType;
 
 	UFUNCTION(Server, Reliable)
-	void Setup(AActor* InOwner, AController* InOwnerController, TSubclassOf<UDamageType> InDamageType, FVector InVelocity);
+	void Setup(AActor* InOwner, AController* InOwnerController, 
+		float InDamage, TSubclassOf<UDamageType> InDamageType, 
+		FVector InVelocity);
 
 protected:
 	// Called when the game starts or when spawned

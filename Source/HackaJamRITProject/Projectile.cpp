@@ -19,10 +19,13 @@ AProjectile::AProjectile()
 }
 
 void AProjectile::Setup_Implementation(
-	AActor* InOwner, AController* InOwnerController, TSubclassOf<UDamageType> InDamageType, FVector InVelocity)
+	AActor* InOwner, AController* InOwnerController, 
+	float InDamage, TSubclassOf<UDamageType> InDamageType, 
+	FVector InVelocity)
 {
 	OwnerActor = InOwner;
 	OwnerController = InOwnerController;
+	Damage = InDamage;
 	DamageType = InDamageType;
 
 	if(ProjectileMovement) ProjectileMovement->Velocity = InVelocity;
@@ -55,7 +58,7 @@ void AProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	if(OtherActor == OwnerActor) return;
 	if(OtherPlayer->GetController() == OwnerController) return; // Don't hit owner player
 
-	OtherPlayer->TakeDamageRep(10, OwnerController, this);
+	OtherPlayer->TakeDamageRep(Damage, OwnerController, this);
 	Destroy();
 }
 

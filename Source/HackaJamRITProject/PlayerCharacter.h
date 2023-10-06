@@ -25,21 +25,31 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
-	// Player Stats
+	// Player Status
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float Health = 100.0f;
 
+	// Player Stats
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HealthMax;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MovementSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float JumpSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Damage = 100.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Defense = 100.0f;
 
+	// Weapon Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClass* ProjectileClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ProjectileCount;
+
+	// Projectile Stats
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage = 10.0f;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//FEventRef OnProjectileHit;
 
 	// TEMP
 	UPROPERTY(EditAnywhere)
@@ -61,12 +71,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
 	void OnFireWeapon();
 
-	UFUNCTION(BlueprintCallable, Category = "Modifiers")
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier);
 
 	UFUNCTION(Server, Reliable)
 	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
-	//float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	void Die();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Game")
+	void OnEndRound(TArray<TSubclassOf<UPlayerModifier>> Boons);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
