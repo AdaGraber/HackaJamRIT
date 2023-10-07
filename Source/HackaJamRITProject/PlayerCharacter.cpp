@@ -69,19 +69,15 @@ void APlayerCharacter::FireWeapon_Implementation()
 	OnFireWeapon();
 }
 
-void APlayerCharacter::ApplyPlayerModifier_Implementation(TSubclassOf<UPlayerModifier> Modifier)
+void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier& Modifier)
 {
-	if(Modifier == nullptr) return;
-
-	UPlayerModifier* NewModifier = Modifier.GetDefaultObject();
-
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, 
-		"APlayerCharacter::AddPlayerModifier: " + NewModifier->DisplayName);
+		"APlayerCharacter::AddPlayerModifier: " + Modifier.DisplayName);
 
 	// Update Stats
-	MovementSpeed *= NewModifier->MovementSpeedModifier;
-	JumpSpeed *= NewModifier->JumpSpeedModifier;
-	Damage *= NewModifier->DamageModifier;
+	MovementSpeed *= Modifier.MovementSpeedModifier;
+	JumpSpeed *= Modifier.JumpSpeedModifier;
+	Damage *= Modifier.DamageModifier;
 }
 
 void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AController* EventInstigator, AActor* DamageCauser)

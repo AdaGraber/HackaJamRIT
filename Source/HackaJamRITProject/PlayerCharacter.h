@@ -53,7 +53,7 @@ public:
 
 	// TEMP
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UPlayerModifier> TestModifier;
+	FPlayerModifier TestModifier;
 
 protected:
 	// Called when the game starts or when spawned
@@ -72,14 +72,14 @@ public:
 	void OnFireWeapon();
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Modifiers")
-	void ApplyPlayerModifier(TSubclassOf<UPlayerModifier> Modifier);
+	void ApplyPlayerModifier(const FPlayerModifier& Modifier);
 
 	UFUNCTION(Server, Reliable)
 	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
 	void Die();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Game")
-	void OnEndRound(TArray<TSubclassOf<UPlayerModifier>> Boons);
+	void OnEndRound(const TArray<FPlayerModifier>& Boons);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

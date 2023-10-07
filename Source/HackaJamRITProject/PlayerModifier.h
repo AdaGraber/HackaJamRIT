@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Engine/DataTable.h"
 #include "PlayerModifier.generated.h"
 
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable)
-class HACKAJAMRITPROJECT_API UPlayerModifier : public UObject
+USTRUCT(Blueprintable)
+struct HACKAJAMRITPROJECT_API FPlayerModifier : public FTableRowBase
 {
 	GENERATED_BODY()
 	
@@ -34,8 +35,6 @@ public:
 	// Projectile Modifiers
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageModifier = 1.0f;
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnProjectileHit(AProjectile* Projectile, AActor* Other); // ON HIT EFFECTS IMPLEMENTED DIRECTLY BY BLUEPRINTS
 
 	// On Hit Modifiers
 	UPROPERTY(EditDefaultsOnly)
