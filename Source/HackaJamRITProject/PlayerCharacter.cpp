@@ -28,7 +28,11 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//ApplyPlayerModifier(TestModifier);
+	// Add this player to server GameState's list of players
+	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
+
+	GameState->AddPlayer(this);
+	GameState->AddActivePlayer(this);
 }
 
 // Called every frame
@@ -49,14 +53,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::FireWeapon_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::White, "FireWeapon()");
-
 	AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileClass, 
 			WeaponComponent->GetComponentTransform()); /*WeaponComponent->GetSocketTransform(TEXT("Barrel"))*/
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)
-		->GetActorForwardVector().ToString());
 
 	if(proj)
 		proj->Setup(
@@ -95,6 +94,7 @@ void APlayerCharacter::Die()
 
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
 
+	// Register this player as dead in the Server GameState
 	GameState->AddInactivePlayer(this);
 }
 

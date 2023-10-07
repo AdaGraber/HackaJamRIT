@@ -25,14 +25,28 @@ public:
 
 private:
 
-	TArray<FPlayerModifier*> Boons; // All boons in the BoonTable; generated on construction
+	UPROPERTY(Replicated)
+	TArray<FPlayerModifier> Boons; // All boons in the BoonTable; generated on construction
 
+	UPROPERTY(Replicated)
 	TArray<APlayerCharacter*> Players; // Players in the game
 
+	UPROPERTY(Replicated)
 	TArray<APlayerCharacter*> ActivePlayers; // Players active/alive in the game
+
+private:
+
+	void ReadBoonsFromTable();
 
 public:
 
+	UFUNCTION(Server, Reliable)
+	void AddPlayer(APlayerCharacter* Player);
+	UFUNCTION(Server, Reliable)
+	void RemovePlayer(APlayerCharacter* Player);
+
+	UFUNCTION(Server, Reliable)
+	void AddActivePlayer(APlayerCharacter* Player);
 	UFUNCTION(Server, Reliable)
 	void AddInactivePlayer(APlayerCharacter* Player);
 
@@ -40,4 +54,11 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void EndRound();
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Players")
+	int GetActivePlayerCount() const;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
