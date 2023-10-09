@@ -10,6 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "EscalationGameState.h"
 
+#include <math.h>
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -53,19 +55,28 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::FireWeapon_Implementation()
 {
-	AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(
+	for(int i = 0; i < ProjectileCount; i++)
+	{
+		AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileClass, 
 			WeaponComponent->GetComponentTransform()); /*WeaponComponent->GetSocketTransform(TEXT("Barrel"))*/
 
-	if(proj)
-		proj->Setup(
-			this, 
-			GetController(), 
-			Damage,
-			UDamageType::StaticClass(), 
-			GetActorForwardVector() * 2000);
+		FVector Dir = GetActorForwardVector();
+		//int BulletSpread = 30 * (1 - Accuracy);
+		//Dir += GetActorRightVector() * cos(((rand() % BulletSpread) - 15) * (180 / PI)) * 0
+		//	+ GetActorUpVector() *  sin(((rand() % BulletSpread) - 15) * (180 / PI)); // Random angle in up and right directions
+		//Dir.Normalize();
 
-	OnFireWeapon();
+		if(proj)
+			proj->Setup(
+				this, 
+				GetController(), 
+				Damage,
+				UDamageType::StaticClass(), 
+				Dir * ProjectileSpeed);
+
+		OnSpawnProjectile();
+	}
 }
 
 void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier& Modifier)
@@ -73,10 +84,24 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, 
 		"APlayerCharacter::AddPlayerModifier: " + Modifier.DisplayName);
 
-	// Update Stats
+	// Update Player Stats
 	MovementSpeed *= Modifier.MovementSpeedModifier;
 	JumpSpeed *= Modifier.JumpSpeedModifier;
+	Defense *= Modifier.DefenseModifier;
+
+	// Update Weapon Stats
+	if(Modifier.ProjectileClass)
+		ProjectileClass = Modifier.ProjectileClass;
+	FireRate *= Modifier.FireRateModifier;
+	ProjectileCount += Modifier.AdditionalProjectileCount;
+	Accuracy *= Modifier.AccuracyModifier;
+
+	// Update Projectile Stats
 	Damage *= Modifier.DamageModifier;
+	ProjectileSpeed *= Modifier.ProjectileSpeedModifier;
+
+	//if(Modifier.ActorToSpawnOnHit)
+		//
 }
 
 void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AController* EventInstigator, AActor* DamageCauser)

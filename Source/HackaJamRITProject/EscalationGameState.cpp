@@ -42,6 +42,16 @@ void AEscalationGameState::AddInactivePlayer_Implementation(APlayerCharacter* Pl
 		EndRound();
 }
 
+void AEscalationGameState::NextRound_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AEscalationGameState::NextRound()");
+	
+	// Figure out how starting next round works
+	/*for(APlayerCharacter* Player : PlayersReadyForNextRound)
+	{
+		Player->OnNextRound(AvailableBoons);
+	}*/
+}
 void AEscalationGameState::EndRound_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AEscalationGameState::EndRound()");

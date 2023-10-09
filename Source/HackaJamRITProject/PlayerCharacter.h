@@ -43,11 +43,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClass* ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int ProjectileCount;
+	float FireRate = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ProjectileCount = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Accuracy = 0.8f; // Bullet Spread (Angle: Degrees) = 90(1 - Accuracy)
 
 	// Projectile Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ProjectileSpeed = 2000;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FEventRef OnProjectileHit;
 
@@ -69,7 +75,7 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapon")
 	void FireWeapon();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")
-	void OnFireWeapon();
+	void OnSpawnProjectile();
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(const FPlayerModifier& Modifier);

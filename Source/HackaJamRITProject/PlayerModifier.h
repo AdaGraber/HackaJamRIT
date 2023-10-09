@@ -17,26 +17,36 @@ struct HACKAJAMRITPROJECT_API FPlayerModifier : public FTableRowBase
 	
 public:
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	FString DisplayName;
+	UPROPERTY(EditAnywhere)
+	FString Description;
 
 	// Player Modifiers
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float MovementSpeedModifier = 1.0f;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float JumpSpeedModifier = 1.0f;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float DefenseModifier = 1.0f;
 
 	// Weapon Modifiers
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ProjectileClass;
+	UPROPERTY(EditAnywhere)
+	float FireRateModifier = 1.0f;
+	UPROPERTY(EditAnywhere)
+	int AdditionalProjectileCount = 0;
+	UPROPERTY(EditAnywhere)
+	float AccuracyModifier = 1.0f;
 
 	// Projectile Modifiers
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageModifier = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ProjectileSpeedModifier = 1.0f;
 
 	// On Hit Modifiers
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ActorToSpawnOnHit;
 };

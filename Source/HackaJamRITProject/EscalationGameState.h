@@ -34,6 +34,9 @@ private:
 	UPROPERTY(Replicated)
 	TArray<APlayerCharacter*> ActivePlayers; // Players active/alive in the game
 
+	UPROPERTY(Replicated)
+	TArray<APlayerCharacter*> PlayersReadyForNextRound;
+
 private:
 
 	void ReadBoonsFromTable();
@@ -52,6 +55,8 @@ public:
 
 private:
 
+	UFUNCTION(Server, Reliable)
+	void NextRound();
 	UFUNCTION(Server, Reliable)
 	void EndRound();
 
