@@ -12,6 +12,8 @@ class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	const float MAX_BULLET_SPREAD = 15;
+
 	// Components
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
@@ -43,23 +45,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClass* ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FireRate = 1.0f;
+	float FireRate = 5.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ProjectileCount = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Accuracy = 0.8f; // Bullet Spread (Angle: Degrees) = 90(1 - Accuracy)
+	float Accuracy = 0.8f; // Bullet Spread (Angle: Degrees) = 15(1 - Accuracy)
 
 	// Projectile Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage = 10.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ProjectileSpeed = 2000;
+	float ProjectileSpeed = 5000;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FEventRef OnProjectileHit;
 
 	// TEMP
 	UPROPERTY(EditAnywhere)
 	FPlayerModifier TestModifier;
+
+private:
+
+	bool bCanFireWeapon = true;
+	void SetCanFireWeapon();
 
 protected:
 	// Called when the game starts or when spawned
@@ -72,6 +79,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	FTimerHandle FireWeaponTimerHandle;
+	void TryFireWeapon();
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Weapon")
 	void FireWeapon();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Weapon")

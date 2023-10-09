@@ -49,8 +49,26 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &APlayerCharacter::FireWeapon);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APlayerCharacter::TryFireWeapon);
 	}
+}
+
+void APlayerCharacter::TryFireWeapon()
+{
+	if(!bCanFireWeapon) return;
+
+	bCanFireWeapon = false;
+
+	// Schedule bCanFireWeapon to be reset
+	GetWorldTimerManager().SetTimer(
+		FireWeaponTimerHandle, this, &APlayerCharacter::SetCanFireWeapon, 1.0f / FireRate, false);
+
+	FireWeapon();
+}
+
+void APlayerCharacter::SetCanFireWeapon()
+{
+	bCanFireWeapon = true;
 }
 
 void APlayerCharacter::FireWeapon_Implementation()
@@ -61,11 +79,22 @@ void APlayerCharacter::FireWeapon_Implementation()
 			ProjectileClass, 
 			WeaponComponent->GetComponentTransform()); /*WeaponComponent->GetSocketTransform(TEXT("Barrel"))*/
 
-		FVector Dir = GetActorForwardVector();
-		//int BulletSpread = 30 * (1 - Accuracy);
-		//Dir += GetActorRightVector() * cos(((rand() % BulletSpread) - 15) * (180 / PI)) * 0
-		//	+ GetActorUpVector() *  sin(((rand() % BulletSpread) - 15) * (180 / PI)); // Random angle in up and right directions
-		//Dir.Normalize();
+		FRotator CameraRot = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
+
+		// TEMP; SHOULD USE WEAPON BARREL SOCKET
+		if(proj)
+			proj->SetActorLocation(
+				UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation()
+			+ CameraRot.Vector() * 100);
+
+		float BulletSpread = MAX_BULLET_SPREAD * (1 - Accuracy);
+
+		FRotator Rotation(
+			CameraRot.Pitch + FMath::RandRange(0.0f, BulletSpread),
+			CameraRot.Yaw + FMath::RandRange(0.0f, BulletSpread),
+			CameraRot.Roll);
+
+		FVector Dir = Rotation.Vector();
 
 		if(proj)
 			proj->Setup(
