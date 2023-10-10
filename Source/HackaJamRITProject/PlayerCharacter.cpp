@@ -9,6 +9,10 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "EscalationGameState.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include <math.h>
 
@@ -20,21 +24,43 @@ APlayerCharacter::APlayerCharacter()
 
 	bReplicates = true;
 
-	// Create Weapon component
-	//Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	//Weapon->SetupAttachment(GetMesh(), TEXT("weapon_r"));
+	// Create Camera Holder
+	CameraHolder = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder"));
+	CameraHolder->SetupAttachment(RootComponent);
+
+	// Create Camera
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Cam"));
+	Camera->SetupAttachment(CameraHolder);
+	Camera->bUsePawnControlRotation = true;
+
+	// Create FP Arms
+	FPArms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Arms"));
+	FPArms->SetupAttachment(Camera);
+
+	// Create FP Weapon component
+	FPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Weapon"));
+	FPWeapon->SetupAttachment(FPArms, TEXT("RH_Weapon"));
+
+	// Create TP Weapon component
+	TPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TP_Weapon"));
+	TPWeapon->SetupAttachment(GetMesh(), TEXT("RH_Weapon"));
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Add this player to server GameState's list of players
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
 
 	GameState->AddPlayer(this);
 	GameState->AddActivePlayer(this);
+
+	Health = HealthMax;
+
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
 }
 
 // Called every frame
@@ -77,22 +103,23 @@ void APlayerCharacter::FireWeapon_Implementation()
 	{
 		AProjectile* proj = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileClass, 
-			WeaponComponent->GetComponentTransform()); /*WeaponComponent->GetSocketTransform(TEXT("Barrel"))*/
-
-		FRotator CameraRot = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
+			FPWeapon->GetSocketTransform(TEXT("Muzzle")));
+		
+		FRotator WeaponRot = FPWeapon->GetComponentRotation();
+			//UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
 
 		// TEMP; SHOULD USE WEAPON BARREL SOCKET
-		if(proj)
+		/*if(proj)
 			proj->SetActorLocation(
 				UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation()
-			+ CameraRot.Vector() * 100);
+			+ CameraRot.Vector() * 100);*/
 
 		float BulletSpread = MAX_BULLET_SPREAD * (1 - Accuracy);
 
 		FRotator Rotation(
-			CameraRot.Pitch + FMath::RandRange(0.0f, BulletSpread),
-			CameraRot.Yaw + FMath::RandRange(0.0f, BulletSpread),
-			CameraRot.Roll);
+			WeaponRot.Pitch + FMath::RandRange(0.0f, BulletSpread),
+			WeaponRot.Yaw + FMath::RandRange(0.0f, BulletSpread),
+			WeaponRot.Roll);
 
 		FVector Dir = Rotation.Vector();
 
@@ -115,7 +142,9 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 
 	// Update Player Stats
 	MovementSpeed *= Modifier.MovementSpeedModifier;
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 	JumpSpeed *= Modifier.JumpSpeedModifier;
+	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
 	Defense *= Modifier.DefenseModifier;
 
 	// Update Weapon Stats
@@ -137,7 +166,7 @@ void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AControl
 {
 	//if(!HasAuthority()) return;
 
-	Health -= DamageAmount;
+	Health -= DamageAmount * (100.0f / Defense);
 
 	if(Health <= 0) Die();
 }

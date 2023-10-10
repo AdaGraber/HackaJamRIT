@@ -14,13 +14,31 @@ class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 
 	const float MAX_BULLET_SPREAD = 15;
 
+public:
+
 	// Components
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* WeaponComponent;
+	/** Camera Holder */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USpringArmComponent* CameraHolder;
+
+	/** Camera Component */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class UCameraComponent* Camera;
+
+	/** The FPS Armature */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USkeletalMeshComponent* FPArms;
+
+	/** Weapon attached to the FPS Armature */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USkeletalMeshComponent* FPWeapon;
+
+	/** Weapon attached to the TPS Armature */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USkeletalMeshComponent* TPWeapon;
 
 	//Input
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* FireAction;
 
 public:
@@ -29,15 +47,15 @@ public:
 
 	// Player Status
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	float Health = 100.0f;
+	float Health;
 
 	// Player Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HealthMax;
+	float HealthMax = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MovementSpeed;
+	float MovementSpeed = 300.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float JumpSpeed;
+	float JumpSpeed = 420.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Defense = 100.0f;
 
