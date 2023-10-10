@@ -39,7 +39,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create FP Weapon component
 	FPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Weapon"));
-	FPWeapon->SetupAttachment(FPArms, TEXT("RH_Weapon"));
+	FPWeapon->SetupAttachment(FPArms, "RH_FWeapon");
 
 	// Create TP Weapon component
 	TPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TP_Weapon"));
