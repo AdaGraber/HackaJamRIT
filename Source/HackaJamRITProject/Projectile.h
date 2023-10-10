@@ -12,7 +12,15 @@ class HACKAJAMRITPROJECT_API AProjectile : public AActor
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+public:
+
+	// Components
+	/** Projectile Mesh */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* Mesh;
+
+	/** Projectile Movement Component */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UProjectileMovementComponent* ProjectileMovement;
 
 public:	
