@@ -105,6 +105,8 @@ void APlayerCharacter::FireWeapon_Implementation()
 			ProjectileClass, 
 			FPWeapon->GetSocketTransform(TEXT("Muzzle")));
 		
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + CameraHolder->GetRelativeRotation().ToString());
+
 		FRotator WeaponRot = FPWeapon->GetComponentRotation();
 			//UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
 
