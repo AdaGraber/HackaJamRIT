@@ -105,10 +105,10 @@ void APlayerCharacter::FireWeapon_Implementation()
 			ProjectileClass, 
 			FPWeapon->GetSocketTransform(TEXT("Muzzle")));
 		
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + CameraHolder->GetRelativeRotation().ToString());
-
-		FRotator WeaponRot = FPWeapon->GetComponentRotation();
+		FRotator WeaponRot = FPWeapon->GetSocketRotation(TEXT("Muzzle"));
 			//UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
+
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + WeaponRot.ToString());
 
 		// TEMP; SHOULD USE WEAPON BARREL SOCKET
 		/*if(proj)
