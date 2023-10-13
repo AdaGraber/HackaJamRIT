@@ -15,6 +15,10 @@ class HACKAJAMRITPROJECT_API AProjectile : public AActor
 public:
 
 	// Components
+	/** Collider */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	class USphereComponent* Collider;
+
 	/** Projectile Mesh */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent* Mesh;

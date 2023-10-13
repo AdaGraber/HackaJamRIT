@@ -5,6 +5,7 @@
 #include "PlayerCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -12,8 +13,11 @@ AProjectile::AProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));
+	Collider->SetupAttachment(RootComponent);
+
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(RootComponent);
+	Mesh->SetupAttachment(Collider);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 
