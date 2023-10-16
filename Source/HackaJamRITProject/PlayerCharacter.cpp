@@ -166,16 +166,32 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 
 void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AController* EventInstigator, AActor* DamageCauser)
 {
-	//if(!HasAuthority()) return;
-
 	Health -= DamageAmount * (100.0f / Defense);
 
-	if(Health <= 0) Die();
+	// HitVector = opposite of Projectile direction
+	FVector HitVector = -1 * DamageCauser->GetVelocity();
+	HitVector = FVector(HitVector.X, HitVector.Y, 0);
+	HitVector.Normalize();
+
+	// Determine Hit Direction (relative to player's rotation; 4 directions)
+	EDirection HitDirection = EDirection::Forward;
+	float HitAngle = (HitVector.HeadingAngle() - GetActorForwardVector().HeadingAngle()) * 180 / PI;
+	if(HitAngle > -45 && HitAngle < 45)
+		HitDirection = EDirection::Forward;
+	else if(HitAngle < -135 && HitAngle > 135)
+		HitDirection = EDirection::Backward;
+	else if(HitAngle < -45 && HitAngle > -135)
+		HitDirection = EDirection::Right;
+	else if(HitAngle > 45 && HitAngle < 135)
+		HitDirection = EDirection::Left;
+
+	if(Health <= 0) Die(HitDirection);
 }
 
-void APlayerCharacter::Die()
+void APlayerCharacter::Die(EDirection HitDirection)
 {
-	// Do something; animation?
+	// Do something; animation? -> Implemented in blueprint
+	OnDie(HitDirection);
 
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
 

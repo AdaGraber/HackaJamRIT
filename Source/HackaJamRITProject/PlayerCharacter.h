@@ -7,6 +7,15 @@
 #include "PlayerModifier.h"
 #include "PlayerCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EDirection : uint8
+{
+	Forward,
+	Backward,
+	Left,
+	Right
+};
+
 UCLASS(Blueprintable)
 class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 {
@@ -63,7 +72,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClass* ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FireRate = 5.0f;
+	float FireRate = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ProjectileCount = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -109,7 +118,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
-	void Die();
+	void Die(EDirection HitDirection);
+	UFUNCTION(BlueprintImplementableEvent, Category = "Damaging")
+	void OnDie(EDirection HitDirection);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Game")
 	void OnEndRound(const TArray<FPlayerModifier>& Boons);
