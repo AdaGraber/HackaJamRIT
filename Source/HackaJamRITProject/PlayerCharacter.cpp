@@ -176,14 +176,14 @@ void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AControl
 	// Determine Hit Direction (relative to player's rotation; 4 directions)
 	EDirection HitDirection = EDirection::Forward;
 	float HitAngle = (HitVector.HeadingAngle() - GetActorForwardVector().HeadingAngle()) * 180 / PI;
-	if(HitAngle > -45 && HitAngle < 45)
+	if(HitAngle > -90 && HitAngle < 90)
 		HitDirection = EDirection::Forward;
-	else if(HitAngle < -135 && HitAngle > 135)
+	else if(HitAngle < -90 || HitAngle > 90)
 		HitDirection = EDirection::Backward;
-	else if(HitAngle < -45 && HitAngle > -135)
+	/*else if(HitAngle < -45 && HitAngle > -135)
 		HitDirection = EDirection::Right;
 	else if(HitAngle > 45 && HitAngle < 135)
-		HitDirection = EDirection::Left;
+		HitDirection = EDirection::Left;*/
 
 	if(Health <= 0) Die(HitDirection);
 }
