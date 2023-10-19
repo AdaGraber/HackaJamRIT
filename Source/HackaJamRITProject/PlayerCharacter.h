@@ -30,6 +30,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class USpringArmComponent* CameraHolder;
 
+	/** Camera Holder */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USpringArmComponent* CameraHolder2;
+
 	/** Camera Component */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UCameraComponent* Camera;

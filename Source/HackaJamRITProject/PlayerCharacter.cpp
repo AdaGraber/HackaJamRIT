@@ -26,20 +26,24 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create Camera Holder
 	CameraHolder = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder"));
-	CameraHolder->SetupAttachment(RootComponent);
+	CameraHolder->SetupAttachment(GetMesh());
 
 	// Create Camera
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Cam"));
 	Camera->SetupAttachment(CameraHolder);
 	Camera->bUsePawnControlRotation = true;
 
+	//create camera holder TWO
+	CameraHolder2 = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder2"));
+	CameraHolder2->SetupAttachment(Camera);
+
 	// Create FP Arms
 	FPArms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Arms"));
-	FPArms->SetupAttachment(Camera);
+	FPArms->SetupAttachment(CameraHolder2);
 
 	// Create FP Weapon component
 	FPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Weapon"));
-	FPWeapon->SetupAttachment(FPArms, "RH_FWeapon");
+	
 
 	// Create TP Weapon component
 	TPWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TP_Weapon"));
@@ -61,6 +65,9 @@ void APlayerCharacter::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
+
+	//FPWeapon->SetupAttachment(FPArms, "GripPoint");
+	FPWeapon->AttachToComponent(FPArms,FAttachmentTransformRules::SnapToTargetIncludingScale, "GripPoint");
 }
 
 // Called every frame
