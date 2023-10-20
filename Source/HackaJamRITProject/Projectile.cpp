@@ -62,10 +62,18 @@ void AProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	APlayerCharacter* OtherPlayer = Cast<APlayerCharacter>(OtherActor);
 
 	if(!OtherPlayer) return;
-	if(OtherActor == OwnerActor) return;
-	if(OtherPlayer->GetController() == OwnerController) return; // Don't hit owner player
+	if(OtherActor == OwnerActor || OtherPlayer->GetController() == OwnerController) return; // Don't hit owner player
 
-	OtherPlayer->TakeDamageRep(Damage, OwnerController, this);
+	// Get the component that was hit on the player
+	UActorComponent* ComponentHit = nullptr;
+	TSet<UPrimitiveComponent*> OverlappingComponents;
+	GetOverlappingComponents(OverlappingComponents);
+	for(UActorComponent* component : OverlappingComponents)
+		if(component->GetOwner() == OtherActor) // If the component belongs to the player, set this as the HitComponent
+			ComponentHit = component;
+
+	// Apply damage to player (Server RPC), telling them which collider was hit
+	OtherPlayer->TakeDamageRep(Damage, OwnerController, this, ComponentHit);
 	Destroy();
 }
 

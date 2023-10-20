@@ -13,6 +13,7 @@
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SphereComponent.h"
 
 #include <math.h>
 
@@ -23,6 +24,11 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
+
+	// Create Head Collider
+	HeadCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Head Collider"));
+	HeadCollider->SetupAttachment(RootComponent);
+	HeadCollider->SetRelativeLocation(FVector::UpVector * 50);
 
 	// Create Camera Holder
 	CameraHolder = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder"));
@@ -171,8 +177,13 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 		//
 }
 
-void APlayerCharacter::TakeDamageRep_Implementation(float DamageAmount, AController* EventInstigator, AActor* DamageCauser)
+void APlayerCharacter::TakeDamageRep_Implementation(
+	float DamageAmount, AController* EventInstigator, AActor* DamageCauser, UActorComponent* ComponentHit)
 {
+	// If headshot, double damage
+	if(ComponentHit == HeadCollider)
+		DamageAmount *= 2.0f;
+
 	Health -= DamageAmount * (100.0f / Defense);
 
 	// HitVector = opposite of Projectile direction

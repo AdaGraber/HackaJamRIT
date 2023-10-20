@@ -26,6 +26,10 @@ class HACKAJAMRITPROJECT_API APlayerCharacter : public ACharacter
 public:
 
 	// Components
+	/** Head Collider - detects headshots */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	class USphereComponent* HeadCollider;
+
 	/** Camera Holder */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class USpringArmComponent* CameraHolder;
@@ -121,7 +125,7 @@ public:
 	void ApplyPlayerModifier(const FPlayerModifier& Modifier);
 
 	UFUNCTION(Server, Reliable)
-	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
+	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, UActorComponent* ComponentHit);
 	void Die(EDirection HitDirection);
 	UFUNCTION(BlueprintImplementableEvent, Category = "Damaging")
 	void OnDie(EDirection HitDirection);
