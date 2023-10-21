@@ -90,7 +90,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Damage = 10.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ProjectileSpeed = 5000;
+	float ProjectileSpeed = 7500;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FEventRef OnProjectileHit;
 

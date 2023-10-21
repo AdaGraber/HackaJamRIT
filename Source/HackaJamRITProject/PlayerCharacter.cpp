@@ -28,7 +28,7 @@ APlayerCharacter::APlayerCharacter()
 	// Create Head Collider
 	HeadCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Head Collider"));
 	HeadCollider->SetupAttachment(GetMesh(), TEXT("headSocket"));
-	HeadCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	HeadCollider->SetRelativeScale3D(FVector(0.75f, 0.75f, 0.75f));
 	if(HeadCollider) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "VALID");
 
 	// Create Camera Holder
@@ -119,15 +119,6 @@ void APlayerCharacter::FireWeapon_Implementation()
 			FPWeapon->GetSocketTransform(TEXT("Muzzle")));
 		
 		FRotator WeaponRot = FPWeapon->GetSocketRotation(TEXT("Muzzle"));
-			//UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
-
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + WeaponRot.ToString());
-
-		// TEMP; SHOULD USE WEAPON BARREL SOCKET
-		/*if(proj)
-			proj->SetActorLocation(
-				UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation()
-			+ CameraRot.Vector() * 100);*/
 
 		float BulletSpread = MAX_BULLET_SPREAD * (1 - Accuracy);
 
