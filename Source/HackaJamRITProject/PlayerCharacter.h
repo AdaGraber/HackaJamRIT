@@ -125,7 +125,8 @@ public:
 	void ApplyPlayerModifier(const FPlayerModifier& Modifier);
 
 	UFUNCTION(Server, Reliable)
-	void TakeDamageRep(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, UActorComponent* ComponentHit);
+	void TakeDamageRep(
+		float DamageAmount, AController* EventInstigator, AActor* DamageCauser, const TArray<UPrimitiveComponent*>& ComponentsHit, UActorComponent* ComponentHit);
 	void Die(EDirection HitDirection);
 	UFUNCTION(BlueprintImplementableEvent, Category = "Damaging")
 	void OnDie(EDirection HitDirection);

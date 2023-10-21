@@ -56,6 +56,9 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	// USE NOTIFYHIT INSTEAD
+	//return;
+
 	// Only want server to do overlap and only if the projectile is set up
 	if(!HasAuthority() || !bIsSetup) return;
 
@@ -66,14 +69,40 @@ void AProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 
 	// Get the component that was hit on the player
 	UActorComponent* ComponentHit = nullptr;
-	TSet<UPrimitiveComponent*> OverlappingComponents;
+	TArray<UPrimitiveComponent*> OverlappingComponents;
 	GetOverlappingComponents(OverlappingComponents);
 	for(UActorComponent* component : OverlappingComponents)
 		if(component->GetOwner() == OtherActor) // If the component belongs to the player, set this as the HitComponent
 			ComponentHit = component;
+	
+	// Apply damage to player (Server RPC), telling them which collider was hit
+	OtherPlayer->TakeDamageRep(Damage, OwnerController, this, OverlappingComponents, ComponentHit);
+	Destroy();
+}
+
+void AProjectile::NotifyHit(
+	class UPrimitiveComponent* MyComp, AActor* Other,
+	class UPrimitiveComponent* OtherComp, bool bSelfMoved,
+	FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	// Only want server to do hit and only if the projectile is set up
+	if(!HasAuthority() || !bIsSetup) return;
+
+	APlayerCharacter* OtherPlayer = Cast<APlayerCharacter>(Other);
+
+	if(!OtherPlayer) return;
+	if(Other == OwnerActor || OtherPlayer->GetController() == OwnerController) return; // Don't hit owner player
+
+	// Get the component that was hit on the player
+	UActorComponent* ComponentHit = nullptr;
+	TArray<UPrimitiveComponent*> OverlappingComponents;
+	GetOverlappingComponents(OverlappingComponents);
+	for(UActorComponent* component : OverlappingComponents)
+		if(component->GetOwner() == Other) // If the component belongs to the player, set this as the HitComponent
+			ComponentHit = component;
 
 	// Apply damage to player (Server RPC), telling them which collider was hit
-	OtherPlayer->TakeDamageRep(Damage, OwnerController, this, ComponentHit);
+	OtherPlayer->TakeDamageRep(Damage, OwnerController, this, OverlappingComponents, ComponentHit);
 	Destroy();
 }
 

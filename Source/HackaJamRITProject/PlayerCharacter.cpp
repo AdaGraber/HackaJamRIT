@@ -27,8 +27,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create Head Collider
 	HeadCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Head Collider"));
-	HeadCollider->SetupAttachment(RootComponent);
-	HeadCollider->SetRelativeLocation(FVector::UpVector * 50);
+	HeadCollider->SetupAttachment(GetMesh(), TEXT("headSocket"));
+	HeadCollider->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	if(HeadCollider) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "VALID");
 
 	// Create Camera Holder
 	CameraHolder = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder"));
@@ -63,7 +64,6 @@ void APlayerCharacter::BeginPlay()
 
 	// Add this player to server GameState's list of players
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
-
 	GameState->AddPlayer(this);
 	GameState->AddActivePlayer(this);
 
@@ -73,7 +73,7 @@ void APlayerCharacter::BeginPlay()
 	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
 
 	//FPWeapon->SetupAttachment(FPArms, "GripPoint");
-	FPWeapon->AttachToComponent(FPArms,FAttachmentTransformRules::SnapToTargetIncludingScale, "GripPoint");
+	FPWeapon->AttachToComponent(FPArms, FAttachmentTransformRules::SnapToTargetIncludingScale, "GripPoint");
 }
 
 // Called every frame
@@ -178,10 +178,16 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 }
 
 void APlayerCharacter::TakeDamageRep_Implementation(
-	float DamageAmount, AController* EventInstigator, AActor* DamageCauser, UActorComponent* ComponentHit)
+	float DamageAmount, AController* EventInstigator, AActor* DamageCauser, const TArray<UPrimitiveComponent*>& ComponentsHit, UActorComponent* ComponentHit)
 {
+	bool headshot = false;
+
+	// headshot iff hits head collider component
+	for(UActorComponent* component : ComponentsHit)
+		if(component->GetFName() == TEXT("Head Collider")) headshot = true; // Uses FName because HeadCollider is sometimes null
+
 	// If headshot, double damage
-	if(ComponentHit == HeadCollider)
+	if(headshot)
 		DamageAmount *= 2.0f;
 
 	Health -= DamageAmount * (100.0f / Defense);
