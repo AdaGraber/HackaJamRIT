@@ -132,6 +132,8 @@ public:
 	void OnDie(EDirection HitDirection);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Game")
+	void OnNextRound();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Game")
 	void OnEndRound(const TArray<FPlayerModifier>& Boons);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

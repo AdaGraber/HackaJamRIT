@@ -42,15 +42,19 @@ void AEscalationGameState::AddInactivePlayer_Implementation(APlayerCharacter* Pl
 		EndRound();
 }
 
-void AEscalationGameState::NextRound_Implementation()
+#pragma region Rounds
+void AEscalationGameState::StartNextRound_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AEscalationGameState::NextRound()");
 	
 	// Figure out how starting next round works
-	/*for(APlayerCharacter* Player : PlayersReadyForNextRound)
+	for(APlayerCharacter* Player : PlayersReadyForNextRound)
 	{
-		Player->OnNextRound(AvailableBoons);
-	}*/
+		//AGameModeBase* k = GameModeClass.GetDefaultObject();
+		//k->RestartPlayer(Player->GetController());
+
+		Player->OnNextRound();
+	}
 }
 void AEscalationGameState::EndRound_Implementation()
 {
@@ -62,14 +66,39 @@ void AEscalationGameState::EndRound_Implementation()
 
 	for(int i = 0; i < 3; i++)
 	{
+		//// Get random boon until boon isn't already listed
+		//int boonIndex;
+		//do
+		//{
+		//	boonIndex = rand() % Boons.Num();
+		//}
+		//while(AvailableBoons.Contains(Boons[boonIndex]));
+
+		//// Add boon to list of boons available to player
+		//AvailableBoons.Add(Boons[boonIndex]);
+
 		AvailableBoons.Add(Boons[rand() % Boons.Num()]);
 	}
 
 	for(APlayerCharacter* Player : Players)
 	{
+		// Call player EndRound; implemented in Blueprint; handles dead and alive players
 		Player->OnEndRound(AvailableBoons);
 	}
 }
+#pragma endregion
+
+#pragma region BoonSelection
+void AEscalationGameState::OnPlayerSelectedBoon_Implementation(APlayerCharacter* Player)
+{
+	// Add ready player
+	PlayersReadyForNextRound.Add(Player);
+
+	// If all players are ready, start next round
+	if(PlayersReadyForNextRound.Num() >= Players.Num())
+		StartNextRound();
+}
+#pragma endregion
 
 int AEscalationGameState::GetActivePlayerCount() const
 {

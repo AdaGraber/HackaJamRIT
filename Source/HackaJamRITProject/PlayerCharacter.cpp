@@ -29,7 +29,6 @@ APlayerCharacter::APlayerCharacter()
 	HeadCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Head Collider"));
 	HeadCollider->SetupAttachment(GetMesh(), TEXT("headSocket"));
 	HeadCollider->SetRelativeScale3D(FVector(0.75f, 0.75f, 0.75f));
-	if(HeadCollider) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "VALID");
 
 	// Create Camera Holder
 	CameraHolder = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Holder"));
@@ -145,6 +144,10 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, 
 		"APlayerCharacter::AddPlayerModifier: " + Modifier.DisplayName);
+
+	// Notify Server GameState that this player has selected a boon
+	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
+	GameState->OnPlayerSelectedBoon(this);
 
 	// Update Player Stats
 	MovementSpeed *= Modifier.MovementSpeedModifier;

@@ -53,12 +53,19 @@ public:
 	UFUNCTION(Server, Reliable)
 	void AddInactivePlayer(APlayerCharacter* Player);
 
+#pragma region BoonSelection
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void OnPlayerSelectedBoon(APlayerCharacter* Player);
+#pragma endregion
+
 private:
 
+#pragma region Rounds
 	UFUNCTION(Server, Reliable)
-	void NextRound();
+	void StartNextRound();
 	UFUNCTION(Server, Reliable)
 	void EndRound();
+#pragma endregion
 
 public:
 
