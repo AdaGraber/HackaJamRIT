@@ -94,9 +94,9 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//FEventRef OnProjectileHit;
 
-	// TEMP
-	UPROPERTY(EditAnywhere)
-	FPlayerModifier TestModifier;
+	// The list of modifiers applied to the player. Only read when copying modifiers to the next round.
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FPlayerModifier> Modifiers;
 
 private:
 

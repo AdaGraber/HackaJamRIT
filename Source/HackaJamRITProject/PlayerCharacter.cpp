@@ -145,6 +145,8 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, 
 		"APlayerCharacter::AddPlayerModifier: " + Modifier.DisplayName);
 
+	Modifiers.Add(Modifier);
+
 	// Notify Server GameState that this player has selected a boon
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
 	GameState->OnPlayerSelectedBoon(this);
@@ -166,9 +168,6 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 	// Update Projectile Stats
 	Damage *= Modifier.DamageModifier;
 	ProjectileSpeed *= Modifier.ProjectileSpeedModifier;
-
-	//if(Modifier.ActorToSpawnOnHit)
-		//
 }
 
 void APlayerCharacter::TakeDamageRep_Implementation(

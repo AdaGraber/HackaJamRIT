@@ -47,12 +47,9 @@ void AEscalationGameState::StartNextRound_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AEscalationGameState::NextRound()");
 	
-	// Figure out how starting next round works
+	// NextRound is handled by the individual players
 	for(APlayerCharacter* Player : PlayersReadyForNextRound)
 	{
-		//AGameModeBase* k = GameModeClass.GetDefaultObject();
-		//k->RestartPlayer(Player->GetController());
-
 		Player->OnNextRound();
 	}
 }
