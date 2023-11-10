@@ -54,9 +54,11 @@ void AEscalationGameState::StartNextRound_Implementation()
 	
 	for(APlayerCharacter* Player : PlayersReadyForNextRound)
 	{
-
-		if (IsValid(Player)) { Player->OnNextRound(); }
-		else {
+		if(IsValid(Player))
+			Player->OnNextRound();
+		else
+		{
+			Players.Remove(Player);
 			ActivePlayers.Remove(Player);
 		}
 	}
@@ -88,7 +90,13 @@ void AEscalationGameState::EndRound_Implementation()
 	for(APlayerCharacter* Player : Players)
 	{
 		// Call player EndRound; implemented in Blueprint; handles dead and alive players
-		Player->OnEndRound(AvailableBoons);
+		if(IsValid(Player))
+			Player->OnEndRound(AvailableBoons);
+		else
+		{
+			Players.Remove(Player);
+			ActivePlayers.Remove(Player);
+		}
 	}
 }
 #pragma endregion
@@ -100,7 +108,8 @@ void AEscalationGameState::OnPlayerSelectedBoon_Implementation(APlayerCharacter*
 	PlayersReadyForNextRound.Add(Player);
 
 	// If all players are ready, start next round
-	if (PlayersReadyForNextRound.Num() >= Players.Num()) {
+	if(PlayersReadyForNextRound.Num() >= Players.Num())
+	{
 		StartNextRound();
 		PlayersReadyForNextRound.Empty();
 	}
@@ -108,7 +117,11 @@ void AEscalationGameState::OnPlayerSelectedBoon_Implementation(APlayerCharacter*
 }
 #pragma endregion
 
-int AEscalationGameState::GetActivePlayerCount() const
+int AEscalationGameState::GetPlayerCount()
+{
+	return Players.Num();
+}
+int AEscalationGameState::GetActivePlayerCount()
 {
 	return ActivePlayers.Num();
 }

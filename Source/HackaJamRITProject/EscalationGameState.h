@@ -43,14 +43,14 @@ private:
 
 public:
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void AddPlayer(APlayerCharacter* Player);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void RemovePlayer(APlayerCharacter* Player);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void AddActivePlayer(APlayerCharacter* Player);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void AddInactivePlayer(APlayerCharacter* Player);
 
 #pragma region BoonSelection
@@ -70,7 +70,9 @@ private:
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Players")
-	int GetActivePlayerCount() const;
+	int GetPlayerCount();
+	UFUNCTION(BlueprintCallable, Category = "Players")
+	int GetActivePlayerCount();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
