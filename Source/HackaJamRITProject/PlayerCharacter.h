@@ -95,7 +95,7 @@ public:
 	//FEventRef OnProjectileHit;
 
 	// The list of modifiers applied to the player. Only read when copying modifiers to the next round.
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FPlayerModifier> Modifiers;
 
 
@@ -125,6 +125,9 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Modifiers")
 	void ApplyPlayerModifier(const FPlayerModifier& Modifier);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Modifiers")
+	void SelectBoon(const FPlayerModifier& Modifier);
 
 	UFUNCTION(Server, Reliable)
 	void TakeDamageRep(

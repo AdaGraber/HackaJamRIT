@@ -147,10 +147,30 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 
 	Modifiers.Add(Modifier);
 
+	// Update Player Stats
+	MovementSpeed *= Modifier.MovementSpeedModifier;
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+	JumpSpeed *= Modifier.JumpSpeedModifier;
+	GetCharacterMovement()->JumpZVelocity = JumpSpeed;
+	Defense *= Modifier.DefenseModifier;
 
-	// Notify Server GameState that this player has selected a boon
-	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
-	GameState->OnPlayerSelectedBoon(this);
+	// Update Weapon Stats
+	if(Modifier.ProjectileClass)
+		ProjectileClass = Modifier.ProjectileClass;
+	FireRate *= Modifier.FireRateModifier;
+	ProjectileCount += Modifier.AdditionalProjectileCount;
+	Accuracy *= Modifier.AccuracyModifier;
+
+	// Update Projectile Stats
+	Damage *= Modifier.DamageModifier;
+	ProjectileSpeed *= Modifier.ProjectileSpeedModifier;
+}
+
+void APlayerCharacter::SelectBoon_Implementation(const FPlayerModifier& Modifier)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "APlayerCharacter::SelectBoon: " + Modifier.DisplayName);
+
+	Modifiers.Add(Modifier);
 
 	// Update Player Stats
 	MovementSpeed *= Modifier.MovementSpeedModifier;
@@ -169,6 +189,10 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 	// Update Projectile Stats
 	Damage *= Modifier.DamageModifier;
 	ProjectileSpeed *= Modifier.ProjectileSpeedModifier;
+
+	// Notify Server GameState that this player has selected a boon
+	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
+	GameState->OnPlayerSelectedBoon(this);
 }
 
 void APlayerCharacter::TakeDamageRep_Implementation(
@@ -192,17 +216,13 @@ void APlayerCharacter::TakeDamageRep_Implementation(
 	HitVector = FVector(HitVector.X, HitVector.Y, 0);
 	HitVector.Normalize();
 
-	// Determine Hit Direction (relative to player's rotation; 4 directions)
+	// Determine Hit Direction (relative to player's rotation; 2 directions)
 	EDirection HitDirection = EDirection::Forward;
 	float HitAngle = (HitVector.HeadingAngle() - GetActorForwardVector().HeadingAngle()) * 180 / PI;
 	if(HitAngle > -90 && HitAngle < 90)
 		HitDirection = EDirection::Forward;
 	else if(HitAngle < -90 || HitAngle > 90)
 		HitDirection = EDirection::Backward;
-	/*else if(HitAngle < -45 && HitAngle > -135)
-		HitDirection = EDirection::Right;
-	else if(HitAngle > 45 && HitAngle < 135)
-		HitDirection = EDirection::Left;*/
 
 	if(Health <= 0) Die(HitDirection);
 }

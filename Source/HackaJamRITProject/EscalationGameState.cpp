@@ -104,6 +104,8 @@ void AEscalationGameState::EndRound_Implementation()
 #pragma region BoonSelection
 void AEscalationGameState::OnPlayerSelectedBoon_Implementation(APlayerCharacter* Player)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "k");
+
 	// Add ready player
 	PlayersReadyForNextRound.Add(Player);
 
