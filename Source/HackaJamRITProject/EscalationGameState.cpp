@@ -3,6 +3,8 @@
 
 #include "EscalationGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "Logging/LogMacros.h"
+
 
 AEscalationGameState::AEscalationGameState()
 {
@@ -45,12 +47,18 @@ void AEscalationGameState::AddInactivePlayer_Implementation(APlayerCharacter* Pl
 #pragma region Rounds
 void AEscalationGameState::StartNextRound_Implementation()
 {
+	ActivePlayers.Empty();
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "AEscalationGameState::NextRound()");
 	
 	// NextRound is handled by the individual players
+	
 	for(APlayerCharacter* Player : PlayersReadyForNextRound)
 	{
-		Player->OnNextRound();
+
+		if (IsValid(Player)) { Player->OnNextRound(); }
+		else {
+			ActivePlayers.Remove(Player);
+		}
 	}
 }
 void AEscalationGameState::EndRound_Implementation()
@@ -92,8 +100,11 @@ void AEscalationGameState::OnPlayerSelectedBoon_Implementation(APlayerCharacter*
 	PlayersReadyForNextRound.Add(Player);
 
 	// If all players are ready, start next round
-	if(PlayersReadyForNextRound.Num() >= Players.Num())
+	if (PlayersReadyForNextRound.Num() >= Players.Num()) {
 		StartNextRound();
+		PlayersReadyForNextRound.Empty();
+	}
+		
 }
 #pragma endregion
 

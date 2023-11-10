@@ -98,6 +98,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FPlayerModifier> Modifiers;
 
+
+
 private:
 
 	bool bCanFireWeapon = true;

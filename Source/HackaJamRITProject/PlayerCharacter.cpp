@@ -147,6 +147,7 @@ void APlayerCharacter::ApplyPlayerModifier_Implementation(const FPlayerModifier&
 
 	Modifiers.Add(Modifier);
 
+
 	// Notify Server GameState that this player has selected a boon
 	AEscalationGameState* GameState = Cast<AEscalationGameState>(GetWorld()->GetGameState());
 	GameState->OnPlayerSelectedBoon(this);
@@ -184,6 +185,7 @@ void APlayerCharacter::TakeDamageRep_Implementation(
 		DamageAmount *= 2.0f;
 
 	Health -= DamageAmount * (100.0f / Defense);
+	Health = FMath::Clamp(Health, 0, 100);
 
 	// HitVector = opposite of Projectile direction
 	FVector HitVector = -1 * DamageCauser->GetVelocity();
