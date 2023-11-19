@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
 #include "MultiplayerSubsystem.generated.h"
@@ -31,25 +30,25 @@ public:
 	FBlueprintSessionSearchResult(FOnlineSessionSearchResult InOnlineResult);
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCreateServerDelegate, bool, WasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFindServerDelegate, const TArray<FBlueprintSessionSearchResult>&, SearchResults);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FJoinServerDelegate, bool, WasSuccessful);
+
 /**
- * Subsystem for handling multiplayer sessions.
+ * 
  */
 UCLASS()
 class HACKAJAMRITPROJECT_API UMultiplayerSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	IOnlineSessionPtr SessionInterface;
 
-	FOnlineSessionSettings SessionSettings;
+	FName CurrentSessionName;
+
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
-
-	TArray<FOnlineSessionSearchResult> CurrentSearchResults;
-
-	// Name of the session currently hosted by the local player.
-	FName HostedSessionName;
 
 public:
 
@@ -59,23 +58,28 @@ public:
 	void Deinitialize() override;
 
 	UFUNCTION(BlueprintCallable)
-	void CreateSession(FString SessionID);
+	void CreateServer(FName ServerName);
 	UFUNCTION(BlueprintCallable)
-	void JoinSession(FString SessionID, const FBlueprintSessionSearchResult& Session);
-
-	// Search for all active sessions. This function is asynchronous and does not return - must get CurrentSearchResults to see results.
+	void FindAllServers();
 	UFUNCTION(BlueprintCallable)
-	void FindAllActiveSessions();
+	void JoinServer(int Index);
+
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnFindSessionsComplete(bool bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	void OnRegisterPlayers(FName SessionName, const TArray<FUniqueNetIdRef>& PlayerId, bool bWasSuccessful);
+
+	UPROPERTY(BlueprintAssignable)
+	FCreateServerDelegate CreateServerDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FFindServerDelegate FindServerDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FJoinServerDelegate JoinServerDelegate;
+
 	UFUNCTION(BlueprintCallable)
-	void FindSessionByName();
-
-	void OnCreateSessionComplete(FName SessionID, bool bSuccess);
-	void OnDestroySessionComplete(FName SessionID, bool bSuccess);
-	void OnFindSessionsComplete(bool bSuccess);
-
+	FString GetSessionIdByIndex(int Index);
 	UFUNCTION(BlueprintCallable)
 	FName GetSubsystemName();
-
-	UFUNCTION(BlueprintCallable)
-	TArray<FBlueprintSessionSearchResult> GetCurrentSearchResults();
 };

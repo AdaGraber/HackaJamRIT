@@ -1,14 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "MultiplayerSubsystem.h"
 #include "OnlineSubsystem.h"
-#include "Interfaces/OnlineSessionInterface.h"
-#include "OnlineSessionSettings.h"
-#include "FindSessionsCallbackProxy.h"
 
 FBlueprintSessionSearchResult::FBlueprintSessionSearchResult()
 {
-	
+
 }
 FBlueprintSessionSearchResult::FBlueprintSessionSearchResult(FOnlineSessionSearchResult InOnlineResult)
 {
@@ -22,155 +20,156 @@ FBlueprintSessionSearchResult::FBlueprintSessionSearchResult(FOnlineSessionSearc
 
 UMultiplayerSubsystem::UMultiplayerSubsystem()
 {
-	
+	CurrentSessionName = FName("Escalation Game");
 }
 
 void UMultiplayerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if(Subsystem)
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	if(OnlineSubsystem)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + Subsystem->GetSubsystemName().ToString());
+		FString SubsystemName = OnlineSubsystem->GetSubsystemName().ToString();
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Subsystem: " + SubsystemName);
 
-		SessionInterface = Subsystem->GetSessionInterface();
+		SessionInterface = OnlineSubsystem->GetSessionInterface();
 		if(SessionInterface.IsValid())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "SESSION VALID");
-
-			// Bind delegates to callback from session operations
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UMultiplayerSubsystem::OnCreateSessionComplete);
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UMultiplayerSubsystem::OnDestroySessionComplete);
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UMultiplayerSubsystem::OnFindSessionsComplete);
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UMultiplayerSubsystem::OnJoinSessionComplete);
+
+			SessionInterface->OnRegisterPlayersCompleteDelegates.AddUObject(this, &UMultiplayerSubsystem::OnRegisterPlayers);
 		}
 	}
 }
+
 void UMultiplayerSubsystem::Deinitialize()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Deinitialize");
-
-	if(!HostedSessionName.IsEqual("")) SessionInterface->DestroySession(HostedSessionName);
+	SessionInterface->DestroySession(CurrentSessionName);
 }
 
-void UMultiplayerSubsystem::CreateSession(FString SessionID)
+void UMultiplayerSubsystem::CreateServer(FName ServerName)
 {
-	//SessionSettings.bAllowInvites = true;
-	//SessionSettings.bAllowJoinInProgress = true;
-	//SessionSettings.bShouldAdvertise = true; // Public; visible to others
-	//SessionSettings.NumPublicConnections = 4; // Max 4 Players
-	//SessionSettings.bUseLobbiesIfAvailable = true; // May be required by Steam
-	//SessionSettings.bUsesPresence = true; // May be required by Steam
-	//SessionSettings.bAllowJoinViaPresence = true;
-	//SessionSettings.bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName().ToString().Equals("NULL"); // LAN matches occur when not using any particular subsystem
-	//SessionSettings.Set(FName("SERVER_NAME"), SessionID, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "CreateServer");
 
-	//// Host is self, name is SessionID, SessionSettings configured above
-	//SessionInterface->CreateSession(0, FName(SessionID), SessionSettings);
-
-
-
-
-
-
-
-
-	FName MySessionName = FName("Co-op Adventure Session Name");
-
-	FOnlineSessionSettings SessionSettings1;
-
-	SessionSettings1.bAllowJoinInProgress = true;
-	SessionSettings1.bIsDedicated = false;
-	SessionSettings1.bShouldAdvertise = true;
-	SessionSettings1.NumPublicConnections = 2;
-	SessionSettings1.bUseLobbiesIfAvailable = true;
-	SessionSettings1.bUsesPresence = true;
-	SessionSettings1.bAllowJoinViaPresence = true;
-	bool IsLAN = false;
-	if (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+	if(ServerName.ToString().IsEmpty())
 	{
-		IsLAN = true;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Server name is empty!");
+		CreateServerDelegate.Broadcast(false);
+		return;
 	}
-	SessionSettings1.bIsLANMatch = IsLAN;
 
-	SessionInterface->CreateSession(0, MySessionName, SessionSettings1);
+	FOnlineSessionSettings SessionSettings;
+	SessionSettings.bAllowJoinInProgress = true;
+	SessionSettings.bIsDedicated = false;
+	SessionSettings.bShouldAdvertise = true;
+	SessionSettings.NumPublicConnections = 2;
+	SessionSettings.bUseLobbiesIfAvailable = true;
+	SessionSettings.bUsesPresence = true;
+	SessionSettings.bAllowJoinViaPresence = true;
+	SessionSettings.bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 
+	SessionSettings.Set(FName("SERVER_NAME"), ServerName.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
+	CurrentSessionName = FName(ServerName);
+	SessionInterface->CreateSession(0, CurrentSessionName, SessionSettings);
 }
-void UMultiplayerSubsystem::JoinSession(FString SessionID, const FBlueprintSessionSearchResult& Session)
+void UMultiplayerSubsystem::FindAllServers()
 {
-	SessionInterface->JoinSession(0, FName(SessionID), Session.OnlineResult);
-}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "FindServer");
 
-void UMultiplayerSubsystem::FindAllActiveSessions()
-{
-	// Use a default search
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	SessionSearch->MaxSearchResults = 99;
-	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
-	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName().ToString().Equals("NULL");
-
-	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-}
-void UMultiplayerSubsystem::FindSessionByName()
-{
-	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	bool IsLAN = false;
-	if (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
-	{
-		IsLAN = true;
-	}
-	SessionSearch->bIsLanQuery = IsLAN;
+	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	SessionSearch->MaxSearchResults = 9999;
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+}
+void UMultiplayerSubsystem::JoinServer(int Index)
+{
+	// Get search result
+	FOnlineSessionSearchResult Result = SessionSearch->SearchResults[Index];
 
-	FNamedOnlineSession* k = SessionInterface->GetNamedSession(FName("Co-op Adventure Session Name"));
-	if(k) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + k->SessionName.ToString());
+	if(Result.IsValid())
+		SessionInterface->JoinSession(0, CurrentSessionName, Result);
 }
 
-void UMultiplayerSubsystem::OnCreateSessionComplete(FName SessionID, bool bSuccess)
+void UMultiplayerSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + FString::Printf(TEXT("OnCreateSession: %d"), bSuccess));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, FString::Printf(TEXT("OnCreateSessionComplete: %d"), bWasSuccessful));
 
-	if(!HostedSessionName.IsEqual("")) SessionInterface->DestroySession(HostedSessionName);
+	CreateServerDelegate.Broadcast(bWasSuccessful);
 
-	HostedSessionName = SessionID;
+	// Move the server to Lobby
+	if(bWasSuccessful)
+		GetWorld()->ServerTravel("/Game/EscalationContent/Maps/Lobby?listen");
 }
-void UMultiplayerSubsystem::OnDestroySessionComplete(FName SessionID, bool bSuccess)
+void UMultiplayerSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + FString::Printf(TEXT("OnDestroySession: %d"), bSuccess));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, 
+		FString::Printf(TEXT("OnDestroySessionComplete, SessionName: %s, Success: %d"), *SessionName.ToString(), bWasSuccessful));
 }
-void UMultiplayerSubsystem::OnFindSessionsComplete(bool bSuccess)
+void UMultiplayerSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + FString::Printf(TEXT("OnFindSessions: %d"), bSuccess));
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + FString::FromInt(SessionSearch->SearchResults.Num()));
+	if(!bWasSuccessful) return;
 
-	// Set current search results to be read from outside the subsystem
-	CurrentSearchResults = SessionSearch->SearchResults;
+	TArray<FOnlineSessionSearchResult> Results = SessionSearch->SearchResults;
 
-	for(FOnlineSessionSearchResult Result : CurrentSearchResults)
+	// Wrap results for use in blueprint via delegate
+	TArray<FBlueprintSessionSearchResult> BlueprintResults;
+	for(FOnlineSessionSearchResult result : Results)
 	{
-		if(Result.IsValid())
-		{
-			FString SessionID = "N/A";
-			if(!Result.Session.SessionSettings.Get(FName("SERVER_NAME"), SessionID))
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "l");;
+		FString SessionID;
+		result.Session.SessionSettings.Get(FName("SERVER_NAME"), SessionID);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Server Found: " + SessionID);
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "" + SessionID);
+		FBlueprintSessionSearchResult BPResult(result);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "SessionID: " + BPResult.SessionID);
+		BlueprintResults.Add(FBlueprintSessionSearchResult(result));
+	}
+	FindServerDelegate.Broadcast(BlueprintResults);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, FString::FromInt(Results.Num()) + " Sessions");
+}
+void UMultiplayerSubsystem::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	JoinServerDelegate.Broadcast(Result == EOnJoinSessionCompleteResult::Success);
+
+	if(Result == EOnJoinSessionCompleteResult::Success)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Successfully joined session " + SessionName.ToString());
+
+		// Try to travel to map hosted by server (lobby)
+		FString Address = "";
+		if(SessionInterface->GetResolvedConnectString(CurrentSessionName, Address))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Address: " + Address);
+			APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+			if(PlayerController)
+			{
+				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+			}
 		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "OnJoinSessionComplete Failed " + SessionName.ToString());
 	}
 }
 
+void UMultiplayerSubsystem::OnRegisterPlayers(FName SessionName, const TArray<FUniqueNetIdRef>& PlayerId, bool bWasSuccessful)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "Registered: " + PlayerId[0]->ToString());
+}
+
+FString UMultiplayerSubsystem::GetSessionIdByIndex(int Index)
+{
+	FString SessionID;
+	SessionSearch->SearchResults[Index].Session.SessionSettings.Get(FName("SERVER_NAME"), SessionID);
+	return SessionID;
+}
 FName UMultiplayerSubsystem::GetSubsystemName()
 {
 	return IOnlineSubsystem::Get()->GetSubsystemName();
-}
-
-TArray<FBlueprintSessionSearchResult> UMultiplayerSubsystem::GetCurrentSearchResults()
-{
-	TArray<FBlueprintSessionSearchResult> Results;
-
-	for(FOnlineSessionSearchResult Result : CurrentSearchResults)
-		Results.Add(FBlueprintSessionSearchResult(Result));
-
-	return Results;
 }
