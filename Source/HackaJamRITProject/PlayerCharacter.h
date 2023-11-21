@@ -66,6 +66,10 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	float Health;
 
+	//Player Score
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Score;
+
 	// Player Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HealthMax = 100.0f;
